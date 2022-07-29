@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
           ProductDetailScreen.routeName: (context) =>
               const ProductDetailScreen(),
           CartScreen.routeName: (context) => const CartScreen(),
-          OrderScreen.routeName: (context) => OrderScreen(),
+          OrderScreen.routeName: (context) => const OrderScreen(),
         },
       ),
     );
