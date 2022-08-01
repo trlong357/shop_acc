@@ -24,12 +24,43 @@ class _EditProductScreenState extends State<EditProductScreen> {
     price: 0,
     description: '',
     imageUrl: '',
+    // isFavorite: false,
   );
+
+  var _initValues = {
+    'title': '',
+    'price': '',
+    'description': '',
+    'imageUrl': '',
+  };
+
+  var _isInit = true;
 
   @override
   void initState() {
     _imageUrlFocusNode.addListener(_updateImageUrl);
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      if (ModalRoute.of(context)?.settings.arguments != null) {
+        final productId = ModalRoute.of(context)!.settings.arguments as String;
+        _editedProduct =
+            Provider.of<Products>(context, listen: false).findById(productId);
+        _initValues = {
+          'title': _editedProduct.title,
+          'price': _editedProduct.price.toString(),
+          'description': _editedProduct.description,
+          'imageUrl': '',
+        };
+        _imageUrlController.text = _editedProduct.imageUrl;
+      }
+    }
+
+    _isInit = false;
+    super.didChangeDependencies();
   }
 
   void _updateImageUrl() {
@@ -60,11 +91,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
     if (!isValid) {
       return;
     }
-    if (_formKey.currentState != null) {
-      _formKey.currentState!.save();
+    _formKey.currentState!.save();
+
+    if (_editedProduct.id != '') {
+      Provider.of<Products>(context, listen: false)
+          .updateProduct(_editedProduct.id, _editedProduct);
+    } else {
       Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
-      Navigator.of(context).pop();
     }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -87,6 +122,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
             child: Column(
               children: [
                 TextFormField(
+                  initialValue: _initValues['title'],
                   decoration: const InputDecoration(labelText: "Title"),
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) {
@@ -105,10 +141,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       id: _editedProduct.id,
                       description: _editedProduct.description,
                       imageUrl: _editedProduct.imageUrl,
+                      isFavorite: _editedProduct.isFavorite,
                     );
                   },
                 ),
                 TextFormField(
+                  initialValue: _initValues['price'],
                   decoration: const InputDecoration(labelText: "Price"),
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.number,
@@ -135,10 +173,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       id: _editedProduct.id,
                       description: _editedProduct.description,
                       imageUrl: _editedProduct.imageUrl,
+                      isFavorite: _editedProduct.isFavorite,
                     );
                   },
                 ),
                 TextFormField(
+                  initialValue: _initValues['description'],
                   decoration: const InputDecoration(labelText: "Description"),
                   maxLines: 3,
                   keyboardType: TextInputType.multiline,
@@ -158,6 +198,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       id: _editedProduct.id,
                       description: value!,
                       imageUrl: _editedProduct.imageUrl,
+                      isFavorite: _editedProduct.isFavorite,
                     );
                   },
                 ),
@@ -217,6 +258,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             id: _editedProduct.id,
                             description: _editedProduct.description,
                             imageUrl: value!,
+                            isFavorite: _editedProduct.isFavorite,
                           );
                         },
                       ),
