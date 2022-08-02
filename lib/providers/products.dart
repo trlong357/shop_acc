@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'product.dart';
 
+import '../models/http_exception.dart';
+
 class Products with ChangeNotifier {
   List<Product> _items = [
     // Product(
@@ -73,17 +75,16 @@ class Products with ChangeNotifier {
           );
         },
       );
-      // print(loadedProducts);
       _items = loadedProducts;
       notifyListeners();
     } catch (err) {
-      rethrow;
+      print(err);
     }
   }
 
   Future<void> addProduct(Product product) async {
     final url = Uri.parse(
-        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products');
+        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products.json');
     try {
       final response = await http.post(
         url,
@@ -111,19 +112,47 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final proIndex = _items.indexWhere((element) => element.id == id);
     if (proIndex >= 0) {
-      _items[proIndex] = newProduct;
+      final url = Uri.parse(
+          'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json');
+      try {
+        await http.patch(url,
+            body: json.encode({
+              'title': newProduct.title,
+              'description': newProduct.description,
+              'price': newProduct.price,
+              'imageUrl': newProduct.imageUrl,
+            }));
+        _items[proIndex] = newProduct;
 
-      notifyListeners();
+        notifyListeners();
+      } catch (error) {
+        print(error);
+      }
     } else {
       print("...");
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((element) => element.id == id);
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.parse(
+        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json');
+
+    final existingProductIndex =
+        _items.indexWhere((element) => element.id == id);
+
+    dynamic existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+    final response = await http.delete(url);
+
+    if (response.statusCode != 200) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException('Could not delete product.');
+    }
+    existingProduct = null;
   }
 }
