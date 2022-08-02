@@ -21,21 +21,22 @@ class Product with ChangeNotifier {
 
   Future<void> toggleFavoriteStatus() async {
     // print(id);
+
     final url = Uri.parse(
       'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json',
     );
-    try {
+    final response = await http.patch(url,
+        body: json.encode(
+          {
+            'isFavorite': !isFavorite,
+          },
+        ));
+    if (response.statusCode == 200) {
       isFavorite = !isFavorite;
-
-      await http.patch(url,
-          body: json.encode(
-            {
-              'isFavorite': isFavorite,
-            },
-          ));
       notifyListeners();
-    } catch (error) {
-      print(error);
+    } else {
+      print("Something wrong!");
+      return;
     }
   }
 }
