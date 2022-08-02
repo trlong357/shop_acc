@@ -53,7 +53,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product product) {
     final url = Uri.parse(
-        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products.json');
+        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products');
 
     return http
         .post(
@@ -76,6 +76,9 @@ class Products with ChangeNotifier {
       );
       _items.add(newProduct);
       notifyListeners();
+    }).catchError((error) {
+      print(error);
+      throw error;
     });
   }
 
