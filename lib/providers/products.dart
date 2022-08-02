@@ -78,7 +78,7 @@ class Products with ChangeNotifier {
       _items = loadedProducts;
       notifyListeners();
     } catch (err) {
-      print(err);
+      // print(err);
     }
   }
 
@@ -107,7 +107,7 @@ class Products with ChangeNotifier {
       _items.add(newProduct);
       notifyListeners();
     } catch (error) {
-      print(error);
+      // print(error);
       rethrow;
     }
   }
@@ -129,10 +129,10 @@ class Products with ChangeNotifier {
 
         notifyListeners();
       } catch (error) {
-        print(error);
+        // print(error);
       }
     } else {
-      print("...");
+      // print("...");
     }
   }
 

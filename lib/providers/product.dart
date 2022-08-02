@@ -35,7 +35,7 @@ class Product with ChangeNotifier {
       isFavorite = !isFavorite;
       notifyListeners();
     } else {
-      print("Something wrong!");
+      // print("Something wrong!");
       return;
     }
   }

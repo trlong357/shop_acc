@@ -5,49 +5,43 @@ import '../providers/orders.dart' show Orders;
 
 import '../widgets/order_item.dart';
 
-class OrderScreen extends StatefulWidget {
+class OrderScreen extends StatelessWidget {
   static const routeName = '/orders';
+
   const OrderScreen({Key? key}) : super(key: key);
 
   @override
-  State<OrderScreen> createState() => _OrderScreenState();
-}
-
-class _OrderScreenState extends State<OrderScreen> {
-  var _isLoading = false;
-  @override
-  void didChangeDependencies() {
-    Future.delayed(Duration.zero).then((_) async {
-      setState(() {
-        _isLoading = true;
-      });
-      await Provider.of<Orders>(context, listen: false).fetchAndSetOrders();
-      setState(() {
-        _isLoading = false;
-      });
-    });
-
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final orderData = Provider.of<Orders>(context);
+    // final orderData = Provider.of<Orders>(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Your Orders"),
-      ),
-      drawer: const AppDrawer(),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemBuilder: ((context, index) => OrderItem(
-                    orderData.orders[index],
-                  )),
-              itemCount: orderData.orders.length,
-            ),
-    );
+        appBar: AppBar(
+          title: const Text("Your Orders"),
+        ),
+        drawer: const AppDrawer(),
+        body: FutureBuilder(
+          future:
+              Provider.of<Orders>(context, listen: false).fetchAndSetOrders(),
+          builder: (context, dataSnapshot) {
+            if (dataSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              if (dataSnapshot.error != null) {
+                // error handling stuff here
+                return const Center(
+                  child: Text("An error has occurred!"),
+                );
+              } else {
+                return Consumer<Orders>(builder: (context, orderData, child) {
+                  return ListView.builder(
+                    itemBuilder: ((context, index) => OrderItem(
+                          orderData.orders[index],
+                        )),
+                    itemCount: orderData.orders.length,
+                  );
+                });
+              }
+            }
+          },
+        ));
   }
 }
