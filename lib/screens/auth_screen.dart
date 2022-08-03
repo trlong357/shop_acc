@@ -152,7 +152,6 @@ class _AuthCardState extends State<AuthCard> {
     } on HttpException catch (error) {
       var errorMsg = 'Authentication failed';
       //toString() da dc override trong lop httpException return message
-      print(error.toString());
       if (error.toString().contains('EMAIL_EXISTS')) {
         errorMsg = 'Invalid email.';
       } else if (error.toString().contains('OPERATION_NOT_ALLOWED')) {

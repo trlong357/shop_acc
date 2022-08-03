@@ -4,6 +4,7 @@ import 'package:shop_acc/screens/product_detail_screen.dart';
 
 import '../providers/product.dart';
 import '../providers/cart.dart';
+import '../providers/auth.dart';
 
 class ProductItem extends StatelessWidget {
   const ProductItem({
@@ -14,6 +15,7 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
 
     var appSecondaryStyle = Theme.of(context).colorScheme.secondary;
     return ClipRRect(
@@ -27,7 +29,7 @@ class ProductItem extends StatelessWidget {
                     ? Icons.favorite
                     : Icons.favorite_border),
                 onPressed: () async {
-                  await product.toggleFavoriteStatus();
+                  await product.toggleFavoriteStatus(authData.token!);
                 },
                 color: appSecondaryStyle, // Vì context ko phải của app nữa
               );
