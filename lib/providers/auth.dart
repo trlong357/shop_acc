@@ -32,6 +32,7 @@ class Auth with ChangeNotifier {
     final url = Uri.parse(
       'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=AIzaSyA8i4ZddWG0VGqis57N1tiK8zLq2ukRcX0',
     );
+    print("password: $password");
     try {
       final response = await http.post(
         url,
