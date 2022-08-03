@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth.dart';
 
+import '../models/http_exception.dart';
+
 // ignore: constant_identifier_names
 enum AuthMode { Signup, Login }
 
@@ -105,6 +107,24 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("An Error Occured!"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("OK..."),
+          )
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       // Invalid!
@@ -114,15 +134,44 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      // Log user in
-      await Provider.of<Auth>(context, listen: false)
-          .login(_authData['email']!, _authData['email']!);
-    } else {
-      // Sign user up
-      await Provider.of<Auth>(context, listen: false)
-          .signup(_authData['email']!, _authData['email']!);
+
+    try {
+      if (_authMode == AuthMode.Login) {
+        // Log user in
+        await Provider.of<Auth>(context, listen: false).login(
+          _authData['email']!,
+          _authData['email']!,
+        );
+      } else {
+        // Sign user up
+        await Provider.of<Auth>(context, listen: false).signup(
+          _authData['email']!,
+          _authData['email']!,
+        );
+      }
+    } on HttpException catch (error) {
+      var errorMsg = 'Authentication failed';
+      //toString() da dc override trong lop httpException return message
+      print(error.toString());
+      if (error.toString().contains('EMAIL_EXISTS')) {
+        errorMsg = 'Invalid email.';
+      } else if (error.toString().contains('OPERATION_NOT_ALLOWED')) {
+        errorMsg = 'Password sign-in is disabled for this project.';
+      } else if (error.toString().contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+        errorMsg = 'Try again later.';
+      } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMsg = 'Invalid email or password.';
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
+        errorMsg = 'Invalid email or password.';
+      } else if (error.toString().contains('USER_DISABLED')) {
+        errorMsg = 'The user account has been disabled.';
+      }
+      _showErrorDialog(errorMsg);
+    } catch (error) {
+      var errorMsg = 'Could not authenticate you. Please try again later';
+      _showErrorDialog(errorMsg);
     }
+
     setState(() {
       _isLoading = false;
     });
