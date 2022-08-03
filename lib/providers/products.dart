@@ -14,7 +14,9 @@ class Products with ChangeNotifier {
 
   final String? authToken;
 
-  Products(this.authToken, this._items);
+  final String? userId;
+
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get favoriteItems {
     return _items.where((element) => element.isFavorite).toList();
@@ -32,6 +34,13 @@ class Products with ChangeNotifier {
       // print(json.decode(response.body).runtimeType);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final loadedProducts = List<Product>.empty(growable: true);
+
+      final favUrl = Uri.parse(
+        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/userFavorites/$userId.json?auth=$authToken',
+      );
+
+      final favoriteResponse = await http.get(favUrl);
+      final favoriteData = json.decode(favoriteResponse.body);
       extractedData.forEach(
         (prodId, prodData) {
           loadedProducts.add(
@@ -41,7 +50,8 @@ class Products with ChangeNotifier {
               description: prodData['description'],
               imageUrl: prodData['imageUrl'],
               price: prodData['price'],
-              isFavorite: prodData['isFavorite'],
+              isFavorite:
+                  favoriteData == null ? false : favoriteData[prodId] ?? false,
             ),
           );
         },
@@ -64,7 +74,6 @@ class Products with ChangeNotifier {
           'description': product.description,
           'price': product.price,
           'imageUrl': product.imageUrl,
-          'isFavorite': product.isFavorite,
         }),
       );
 
