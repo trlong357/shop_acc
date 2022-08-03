@@ -26,9 +26,11 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  Future<void> fetchAndSetProducts() async {
+  Future<void> fetchAndSetProducts([bool fetchItemByUser = false]) async {
+    String fetchByUser =
+        fetchItemByUser == true ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     final url = Uri.parse(
-        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken');
+        'https://shopacc-117e8-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken&$fetchByUser');
     try {
       final response = await http.get(url);
       // print(json.decode(response.body).runtimeType);
@@ -74,6 +76,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'price': product.price,
           'imageUrl': product.imageUrl,
+          'creatorId': userId,
         }),
       );
 

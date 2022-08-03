@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shop_acc/screens/order_screen.dart';
 import '../screens/user_products_creen.dart';
+import '../providers/auth.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -39,6 +41,18 @@ class AppDrawer extends StatelessWidget {
                   .pushReplacementNamed(UserProductsScreen.routeName);
             },
           ),
+          // const Divider(),
+          Expanded(
+              child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ListTile(
+              leading: const Icon(Icons.exit_to_app),
+              title: const Text('Manage Products'),
+              onTap: () {
+                Provider.of<Auth>(context, listen: false).logOut();
+              },
+            ),
+          ))
         ],
       ),
     );
