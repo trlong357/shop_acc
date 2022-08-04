@@ -107,32 +107,32 @@ class _AuthCardState extends State<AuthCard>
   };
   var _isLoading = false;
   final _passwordController = TextEditingController();
-  AnimationController? _animateController;
-  Animation<Size>? _heightAnimation;
+  late AnimationController _animateController;
+  late Animation<Size> _heightAnimation;
 
   @override
   void initState() {
     super.initState();
     _animateController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 30),
+      duration: const Duration(seconds: 1),
     );
     _heightAnimation = Tween<Size>(
       begin: const Size(double.infinity, 260),
       end: const Size(double.infinity, 320),
     ).animate(
       CurvedAnimation(
-        parent: _animateController!,
+        parent: _animateController,
         curve: Curves.fastOutSlowIn,
       ),
     );
-    _heightAnimation!.addListener(() => setState(() {}));
+    // _heightAnimation.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     super.dispose();
-    _animateController!.dispose();
+    _animateController.dispose();
   }
 
   void _showErrorDialog(String message) {
@@ -209,12 +209,12 @@ class _AuthCardState extends State<AuthCard>
       setState(() {
         _authMode = AuthMode.Signup;
       });
-      _animateController!.forward();
+      _animateController.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
-      _animateController!.reverse();
+      _animateController.reverse();
     }
   }
 
@@ -226,14 +226,17 @@ class _AuthCardState extends State<AuthCard>
         borderRadius: BorderRadius.circular(10.0),
       ),
       elevation: 8.0,
-      child: Container(
-        // height: _authMode == AuthMode.Signup ? 320 : 260,
-        height: _heightAnimation!.value.height,
-
-        constraints:
-            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
-        width: deviceSize.width * 0.75,
-        padding: const EdgeInsets.all(16.0),
+      child: AnimatedBuilder(
+        animation: _heightAnimation,
+        builder: (context, animateChild) => Container(
+            // height: _authMode == AuthMode.Signup ? 320 : 260,
+            height: _heightAnimation.value.height,
+            constraints: BoxConstraints(
+              minHeight: _heightAnimation.value.height,
+            ),
+            width: deviceSize.width * 0.75,
+            padding: const EdgeInsets.all(16.0),
+            child: animateChild),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
